@@ -3,6 +3,8 @@
 
 A fork of OpenSceneGraph focused on speed, and less focused on accuracy & backwards compatibility.
 
+This fork was created to experiment with performance enhancements for OpenMW, that are too controversial to be included in the general purpose OSG project - either for design reasons or backward compatibility reasons.
+
 Current list of patches:
 
 - Use single precision matrices & planes by default.
