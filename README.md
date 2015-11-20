@@ -5,7 +5,9 @@ A fork of OpenSceneGraph focused on speed, and less focused on accuracy & backwa
 
 This fork was created to experiment with performance enhancements for [OpenMW](https://github.com/OpenMW/openmw), that are too controversial to be included in the general purpose OSG project - either for design reasons or backward compatibility reasons.
 
-Current list of patches:
+OpenMW still works with "vanilla" OpenSceneGraph - but it will run at slightly lower framerate.
+
+Current list of patches in this repository:
 
 - Use single precision matrices & planes by default.
 - Added option for single precision osg::Quat's (enabled by default). [Similar change rejected on osg-submissions.](http://forum.openscenegraph.org/viewtopic.php?t=12953)
