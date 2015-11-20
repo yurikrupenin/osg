@@ -380,6 +380,9 @@ OPTION(OSG_NOTIFY_DISABLED "Set to ON to build OpenSceneGraph with the notify() 
 OPTION(OSG_USE_FLOAT_MATRIX "Set to ON to build OpenSceneGraph with float Matrix instead of double." ON)
 MARK_AS_ADVANCED(OSG_USE_FLOAT_MATRIX)
 
+OPTION(OSG_USE_FLOAT_QUAT "Set to ON to build OpenSceneGraph with float Quat (quaternion) instead of double." ON)
+MARK_AS_ADVANCED(OSG_USE_FLOAT_QUAT)
+
 OPTION(OSG_USE_FLOAT_PLANE "Set to ON to build OpenSceneGraph with float Plane instead of double." ON)
 MARK_AS_ADVANCED(OSG_USE_FLOAT_PLANE)
 
