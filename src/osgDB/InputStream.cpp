@@ -185,9 +185,13 @@ InputStream& InputStream::operator>>( osg::Vec3d& v )
 InputStream& InputStream::operator>>( osg::Vec4d& v )
 { *this >> v.x() >> v.y() >> v.z() >> v.w(); return *this; }
 
-
 InputStream& InputStream::operator>>( osg::Quat& q )
-{ *this >> q.x() >> q.y() >> q.z() >> q.w(); return *this; }
+{
+    double x, y, z, w;
+    *this >> x >> y >> z >> w;
+    q.set(x, y, z, w);
+    return *this;
+}
 
 InputStream& InputStream::operator>>( osg::Plane& p )
 {
