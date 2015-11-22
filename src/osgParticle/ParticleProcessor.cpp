@@ -54,12 +54,8 @@ osgParticle::ParticleProcessor::ParticleProcessor(const ParticleProcessor& copy,
 
 void osgParticle::ParticleProcessor::traverse(osg::NodeVisitor& nv)
 {
-    // typecast the NodeVisitor to CullVisitor
-    osgUtil::CullVisitor* cv = dynamic_cast<osgUtil::CullVisitor*>(&nv);
-
-    // continue only if the visitor actually is a cull visitor
-    if (cv) {
-
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    {
         // continue only if the particle system is valid
         if (_ps.valid())
         {
