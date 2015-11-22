@@ -51,9 +51,9 @@ void Technique::traverse_implementation(osg::NodeVisitor& nv, Effect* fx)
     }
 
     // special actions must be taken if the node visitor is actually a CullVisitor
-    osgUtil::CullVisitor* cv = nv.asCullVisitor();
-    if (cv)
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
+        osgUtil::CullVisitor *cv = static_cast<osgUtil::CullVisitor *>(&nv);
         // traverse all passes
         for (size_t i=0; i<_passes.size(); ++i)
         {
