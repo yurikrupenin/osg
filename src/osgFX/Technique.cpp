@@ -42,28 +42,29 @@ void Technique::traverse_implementation(osg::NodeVisitor& nv, Effect* fx)
     }
 
     // special actions must be taken if the node visitor is actually a CullVisitor
-    osgUtil::CullVisitor *cv = dynamic_cast<osgUtil::CullVisitor *>(&nv);
+    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    {
+        osgUtil::CullVisitor *cv = static_cast<osgUtil::CullVisitor *>(&nv);
 
-    // traverse all passes
-    for (int i=0; i<getNumPasses(); ++i) {
+        // traverse all passes
+        for (int i=0; i<getNumPasses(); ++i) {
 
-        // push the i-th pass' StateSet if necessary
-        if (cv) {
+            // push the i-th pass' StateSet
             cv->pushStateSet(_passes[i].get());
-        }
 
-        // traverse the override node if defined, otherwise
-        // traverse children as a Group would do
-        osg::Node *override = getOverrideChild(i);
-        if (override) {
-            override->accept(nv);
-        } else {
-            fx->inherited_traverse(nv);
-        }
+            // traverse the override node if defined, otherwise
+            // traverse children as a Group would do
+            osg::Node *override = getOverrideChild(i);
+            if (override) {
+                override->accept(nv);
+            } else {
+                fx->inherited_traverse(nv);
+            }
 
-        // pop the StateSet if necessary
-        if (cv) {
+            // pop the StateSet
             cv->popStateSet();
         }
     }
+    else
+        fx->inherited_traverse(nv);
 }
