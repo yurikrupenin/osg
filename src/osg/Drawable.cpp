@@ -218,8 +218,8 @@ void Drawable::flushDeletedDisplayLists(unsigned int contextID, double& availabl
 
 bool Drawable::UpdateCallback::run(osg::Object* object, osg::Object* data)
 {
-    osg::Drawable* drawable = dynamic_cast<osg::Drawable*>(object);
-    osg::NodeVisitor* nv = dynamic_cast<osg::NodeVisitor*>(data);
+    osg::Drawable* drawable = static_cast<osg::Drawable*>(object->asNode());
+    osg::NodeVisitor* nv = data->asNodeVisitor();
     if (drawable && nv)
     {
         update(nv, drawable);
@@ -233,8 +233,8 @@ bool Drawable::UpdateCallback::run(osg::Object* object, osg::Object* data)
 
 bool Drawable::EventCallback::run(osg::Object* object, osg::Object* data)
 {
-    osg::Drawable* drawable = dynamic_cast<osg::Drawable*>(object);
-    osg::NodeVisitor* nv = dynamic_cast<osg::NodeVisitor*>(data);
+    osg::Drawable* drawable = static_cast<osg::Drawable*>(object->asNode());
+    osg::NodeVisitor* nv = data->asNodeVisitor();
     if (drawable && nv)
     {
         event(nv, drawable);
