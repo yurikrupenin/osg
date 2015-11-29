@@ -274,7 +274,7 @@ void ViewerBase::setUpThreading()
     getContexts(contexts);
 
     // set up affinity of main thread
-    OpenThreads::SetProcessorAffinityOfCurrentThread(_affinity);
+    //OpenThreads::SetProcessorAffinityOfCurrentThread(_affinity);
 
     // set up the number of graphics contexts.
     {
