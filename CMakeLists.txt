@@ -724,28 +724,23 @@ IF(OSG_USE_QT AND NOT ANDROID)
 
     ELSE()
 
-        FIND_PACKAGE(Qt5Widgets QUIET)
-
-        IF ( Qt5Widgets_FOUND )
-            # CMake 2.8.8 or greater required
-            BUILDER_VERSION_GREATER(2 8 7)
-            IF(NOT VALID_BUILDER_VERSION)
-                MESSAGE(
-                SEND_ERROR
-                "Qt5 requires CMake version 2.8.8 or greater!\n"
-                "Update CMake or set DESIRED_QT_VERSION to less than 5
-                or disable OSG_USE_QT."
-                )
-            ENDIF( )
-        ENDIF( )
-
-        IF ( NOT Qt5Widgets_FOUND )
             FIND_PACKAGE(Qt4)
-
             IF (NOT QT4_FOUND)
-                FIND_PACKAGE(Qt3)
+                FIND_PACKAGE(Qt5Widgets QUIET)
+
+                IF ( Qt5Widgets_FOUND )
+                    # CMake 2.8.8 or greater required
+                    BUILDER_VERSION_GREATER(2 8 7)
+                    IF(NOT VALID_BUILDER_VERSION)
+                        MESSAGE(
+                        SEND_ERROR
+                        "Qt5 requires CMake version 2.8.8 or greater!\n"
+                        "Update CMake or set DESIRED_QT_VERSION to less than 5
+                        or disable OSG_USE_QT."
+                        )
+                    ENDIF( )
+                ENDIF( )
             ENDIF()
-        ENDIF()
     ENDIF()
 
     #If we have found Qt5, let's try to top off by getting the webkit as well
