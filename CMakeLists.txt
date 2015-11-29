@@ -866,11 +866,6 @@ ENDIF()
 ################################################################################
 # Installation stuff
 
-SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "add a postfix, usually d on windows")
-SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "add a postfix, usually empty on windows")
-SET(CMAKE_RELWITHDEBINFO_POSTFIX "rd" CACHE STRING "add a postfix, usually empty on windows")
-SET(CMAKE_MINSIZEREL_POSTFIX "s" CACHE STRING "add a postfix, usually empty on windows")
-
 # Correct any incorrect case usage in CMAKE_BUILD_TYPE
 IF     (CMAKE_BUILD_TYPE MATCHES "release" OR CMAKE_BUILD_TYPE MATCHES "RELEASE")
     SET(CMAKE_BUILD_TYPE "Release")
