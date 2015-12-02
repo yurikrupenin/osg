@@ -36,7 +36,6 @@ osgParticle::ParticleSystem::ParticleSystem()
     _align_X_axis(1, 0, 0),
     _align_Y_axis(0, 1, 0),
     _particleScaleReferenceFrame(WORLD_COORDINATES),
-    _useVertexArray(false),
     _useShaders(false),
     _dirty_uniforms(false),
     _doublepass(false),
@@ -68,7 +67,6 @@ osgParticle::ParticleSystem::ParticleSystem(const ParticleSystem& copy, const os
     _align_X_axis(copy._align_X_axis),
     _align_Y_axis(copy._align_Y_axis),
     _particleScaleReferenceFrame(copy._particleScaleReferenceFrame),
-    _useVertexArray(copy._useVertexArray),
     _useShaders(copy._useShaders),
     _dirty_uniforms(copy._dirty_uniforms),
     _doublepass(copy._doublepass),
@@ -92,6 +90,14 @@ osgParticle::ParticleSystem::ParticleSystem(const ParticleSystem& copy, const os
 
 osgParticle::ParticleSystem::~ParticleSystem()
 {
+    for (unsigned int i=0; i<_particles.size(); ++i)
+        delete _particles[i];
+    _particles.clear();
+}
+
+bool cmp_particles(const osgParticle::Particle* left, const osgParticle::Particle* right)
+{
+    return *left < *right;
 }
 
 void osgParticle::ParticleSystem::update(double dt, osg::NodeVisitor& nv)
@@ -118,7 +124,7 @@ void osgParticle::ParticleSystem::update(double dt, osg::NodeVisitor& nv)
 
     for(unsigned int i=0; i<_particles.size(); ++i)
     {
-        Particle& particle = _particles[i];
+        Particle& particle = *_particles[i];
         if (particle.isAlive())
         {
             if (particle.update(dt, _useShaders))
@@ -143,15 +149,16 @@ void osgParticle::ParticleSystem::update(double dt, osg::NodeVisitor& nv)
             double deadDistance = DBL_MAX;
             for (unsigned int i=0; i<_particles.size(); ++i)
             {
-                Particle& particle = _particles[i];
+                Particle& particle = *_particles[i];
                 if (particle.isAlive())
                     particle.setDepth(distance(particle.getPosition(), *modelview) * scale);
                 else
                     particle.setDepth(deadDistance);
             }
-            std::sort<Particle_vector::iterator>(_particles.begin(), _particles.end());
+            std::sort<Particle_vector::iterator>(_particles.begin(), _particles.end(), cmp_particles);
 
             // Repopulate the death stack as it will have been invalidated by the sort.
+            /*
             unsigned int numDead = _deadparts.size();
             if (numDead>0)
             {
@@ -159,13 +166,14 @@ void osgParticle::ParticleSystem::update(double dt, osg::NodeVisitor& nv)
                 _deadparts = Death_stack();
 
                 // copy the tail of the _particles vector as this will contain all the dead Particle thanks to the depth sort against DBL_MAX
-                Particle* first_dead_ptr  = &_particles[_particles.size()-numDead];
-                Particle* last_dead_ptr  = &_particles[_particles.size()-1];
+                Particle* first_dead_ptr  = _particles[_particles.size()-numDead];
+                Particle* last_dead_ptr  = _particles[_particles.size()-1];
                 for(Particle* dead_ptr  = first_dead_ptr; dead_ptr<=last_dead_ptr; ++dead_ptr)
                 {
                     _deadparts.push(dead_ptr);
                 }
             }
+            */
         }
     }
 
@@ -198,10 +206,7 @@ void osgParticle::ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo
     glDepthMask(GL_FALSE);
 
     // render, first pass
-    if (_useVertexArray)
-        render_vertex_array(renderInfo);
-    else
-        single_pass_render(renderInfo, modelview);
+    single_pass_render(renderInfo, modelview);
 
 #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
     // restore depth mask settings
@@ -217,10 +222,7 @@ void osgParticle::ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo
         glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 
         // render the particles onto the depth buffer
-        if (_useVertexArray)
-            render_vertex_array(renderInfo);
-        else
-            single_pass_render(renderInfo, modelview);
+        single_pass_render(renderInfo, modelview);
 
 #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
         // restore color mask settings
@@ -270,7 +272,6 @@ void osgParticle::ParticleSystem::setDefaultAttributes(const std::string& textur
     stateset->setAttributeAndModes(blend, osg::StateAttribute::ON);
 
     setStateSet(stateset);
-    setUseVertexArray(false);
     setUseShaders(false);
 }
 
@@ -409,7 +410,7 @@ void osgParticle::ParticleSystem::single_pass_render(osg::RenderInfo& renderInfo
     }
 
     bool requiresEndRender = false;
-    const Particle* startParticle = &_particles[0];
+    const Particle* startParticle = _particles[0];
     if (startParticle->getShape() != Particle::USER)
     {
         startParticle->beginRender(gl);
@@ -423,7 +424,7 @@ void osgParticle::ParticleSystem::single_pass_render(osg::RenderInfo& renderInfo
 
     for(unsigned int i=0; i<_particles.size(); i+=_detail)
     {
-        const Particle* currentParticle = &_particles[i];
+        const Particle* currentParticle = _particles[i];
 
         bool insideDistance = true;
         if (_sortMode != NO_SORT && _visibilityDistance>0.0)
@@ -494,38 +495,6 @@ void osgParticle::ParticleSystem::single_pass_render(osg::RenderInfo& renderInfo
 
     if (requiresEndRender)
         startParticle->endRender(gl);
-}
-
-void osgParticle::ParticleSystem::render_vertex_array(osg::RenderInfo& renderInfo) const
-{
-    if (_particles.size() <= 0) return;
-
-    // Compute the pointer and offsets
-    Particle_vector::const_iterator itr = _particles.begin();
-    float* ptr = (float*)(&(*itr));
-    GLsizei stride = 0;
-    if (_particles.size() > 1)
-    {
-        float* ptr1 = (float*)(&(*(itr+1)));
-        stride = ptr1 - ptr;
-    }
-    GLsizei posOffset = (float*)(&(itr->_position)) - ptr;         // Position
-    GLsizei colorOffset = (float*)(&(itr->_current_color)) - ptr;  // Color
-    GLsizei velOffset = (float*)(&(itr->_velocity)) - ptr;         // Velocity
-    GLsizei propOffset = (float*)(&(itr->_alive)) - ptr;       // Alive, size & alpha
-
-    // Draw particles as arrays
-    osg::State& state = *renderInfo.getState();
-    state.lazyDisablingOfVertexAttributes();
-    state.setColorPointer(4, GL_FLOAT, stride * sizeof(float), ptr + colorOffset);
-    state.setVertexPointer(3, GL_FLOAT, stride * sizeof(float), ptr + posOffset);
-    if (_useShaders)
-    {
-        state.setNormalPointer(GL_FLOAT, stride * sizeof(float), ptr + velOffset);
-        state.setTexCoordPointer(0, 3, GL_FLOAT, stride * sizeof(float), ptr + propOffset);
-    }
-    state.applyDisablingOfVertexAttributes();
-    glDrawArrays(GL_POINTS, 0, _particles.size());
 }
 
 osg::BoundingBox osgParticle::ParticleSystem::computeBoundingBox() const
