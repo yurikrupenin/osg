@@ -110,16 +110,15 @@ namespace osgParticle
         */
         inline void setDefaultBoundingBox(const osg::BoundingBox& bbox);
 
-        /// Return true if we use vertex arrays for rendering particles.
-        bool getUseVertexArray() const { return _useVertexArray; }
-
         /** Set to use vertex arrays for rendering particles.
             Lots of variables will be omitted: particles' shape, alive or not, visibility distance, and so on,
             so the rendering result is not as good as we wish (although it's fast than using glBegin/glEnd).
             We had better use this for GLSL shaders, in which particle parameters will be kept as uniforms.
             This method is called automatically by <CODE>setDefaultAttributesUsingShaders()</CODE>.
         */
-        void setUseVertexArray(bool v) { _useVertexArray = v; }
+        void setUseVertexArray(bool) { }
+
+        bool getUseVertexArray() const { return false; }
 
         /// Return true if shaders are required.
         bool getUseShaders() const { return _useShaders; }
@@ -173,7 +172,7 @@ namespace osgParticle
         inline virtual void destroyParticle(int i);
 
         /// Reuse the i-th particle.
-        inline virtual void reuseParticle(int i) { _deadparts.push(&(_particles[i])); }
+        inline virtual void reuseParticle(int i) { _deadparts.push((_particles[i])); }
 
         /// Get the last frame number.
         inline unsigned int getLastFrameNumber() const;
@@ -265,9 +264,8 @@ namespace osgParticle
 
         inline void update_bounds(const osg::Vec3& p, float r);
         void single_pass_render(osg::RenderInfo& renderInfo, const osg::Matrix& modelview) const;
-        void render_vertex_array(osg::RenderInfo& renderInfo) const;
 
-        typedef std::vector<Particle> Particle_vector;
+        typedef std::vector<Particle*> Particle_vector;
         typedef std::stack<Particle*> Death_stack;
 
         Particle_vector _particles;
@@ -280,7 +278,6 @@ namespace osgParticle
         osg::Vec3 _align_Y_axis;
         ParticleScaleReferenceFrame _particleScaleReferenceFrame;
 
-        bool _useVertexArray;
         bool _useShaders;
         bool _dirty_uniforms;
 
@@ -390,17 +387,17 @@ namespace osgParticle
 
     inline Particle* ParticleSystem::getParticle(int i)
     {
-        return &_particles[i];
+        return _particles[i];
     }
 
     inline const Particle* ParticleSystem::getParticle(int i) const
     {
-        return &_particles[i];
+        return _particles[i];
     }
 
     inline void ParticleSystem::destroyParticle(int i)
     {
-        _particles[i].kill();
+        _particles[i]->kill();
     }
 
     inline unsigned int ParticleSystem::getLastFrameNumber() const
@@ -516,8 +513,8 @@ namespace osgParticle
         } else {
 
             // add a new particle to the vector
-            _particles.push_back(ptemplate? *ptemplate: _def_ptemp);
-            return &_particles.back();
+            _particles.push_back(ptemplate? new Particle(*ptemplate): new Particle(_def_ptemp));
+            return _particles.back();
         }
     }
 
