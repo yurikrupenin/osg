@@ -280,6 +280,10 @@ QueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
 {
     unsigned int contextID = renderInfo.getState()->getContextID();
     osg::GLExtensions* ext = renderInfo.getState()->get<GLExtensions>();
+
+    if (!ext->isARBOcclusionQuerySupported && !ext->isOcclusionQuerySupported)
+        return;
+
     osg::Camera* cam = renderInfo.getCurrentCamera();
 
     // Add callbacks if necessary.
@@ -420,7 +424,8 @@ QueryGeometry::flushDeletedQueryObjects( unsigned int contextID, double /*curren
             titr!=qol.end() && elapsedTime<availableTime;
             )
         {
-            extensions->glDeleteQueries( 1L, &(*titr ) );
+            if (extensions->isOcclusionQuerySupported || extensions->isARBOcclusionQuerySupported)
+                extensions->glDeleteQueries( 1L, &(*titr ) );
             titr = qol.erase(titr);
             elapsedTime = timer.delta_s(start_tick,timer.tick());
         }
