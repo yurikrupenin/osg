@@ -198,41 +198,8 @@ void osgParticle::ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo
     // get the current modelview matrix
     osg::Matrix modelview = state.getModelViewMatrix();
 
-    // set up depth mask for first rendering pass
-#if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-    glPushAttrib(GL_DEPTH_BUFFER_BIT);
-#endif
-
-    glDepthMask(GL_FALSE);
-
     // render, first pass
     single_pass_render(renderInfo, modelview);
-
-#if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-    // restore depth mask settings
-    glPopAttrib();
-#endif
-
-    // render, second pass
-    if (_doublepass) {
-        // set up color mask for second rendering pass
-#if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-        glPushAttrib(GL_COLOR_BUFFER_BIT);
-#endif
-        glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-        // render the particles onto the depth buffer
-        single_pass_render(renderInfo, modelview);
-
-#if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-        // restore color mask settings
-        glPopAttrib();
-#endif
-    }
-
-#if defined(OSG_GLES1_AVAILABLE) || defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-    OSG_NOTICE<<"Warning: ParticleSystem::drawImplementation(..) not fully implemented."<<std::endl;
-#endif
 
 }
 
@@ -416,11 +383,6 @@ void osgParticle::ParticleSystem::single_pass_render(osg::RenderInfo& renderInfo
         startParticle->beginRender(gl);
         requiresEndRender = true;
     }
-    else
-    {
-        // Enable writing depth mask when drawing user-defined particles
-        glDepthMask(GL_TRUE);
-    }
 
     for(unsigned int i=0; i<_particles.size(); i+=_detail)
     {
@@ -440,10 +402,7 @@ void osgParticle::ParticleSystem::single_pass_render(osg::RenderInfo& renderInfo
                 {
                     currentParticle->beginRender(gl);
                     requiresEndRender = true;
-                    glDepthMask(GL_FALSE);
                 }
-                else
-                    glDepthMask(GL_TRUE);
             }
             ++_draw_count;
 
