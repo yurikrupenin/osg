@@ -39,7 +39,7 @@ void daeWriter::writeUpdateTransformElements(const osg::Vec3 &pos, const osg::Qu
 
     // Make a three rotate place elements for the euler angles
     // TODO decompose quaternion into three euler angles
-    double angle;
+    osg::Quat::value_type angle;
     osg::Vec3 axis;
     q.getRotate( angle, axis );
 
