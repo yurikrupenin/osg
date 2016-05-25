@@ -817,19 +817,7 @@ ENDIF()
 
 ################################################################################
 # Installation stuff
-
-# Set the build postfix extension according to what configuration is being built.
-IF (CMAKE_BUILD_TYPE MATCHES "Release")
-    SET(CMAKE_BUILD_POSTFIX "${CMAKE_RELEASE_POSTFIX}")
-ELSEIF (CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
-    SET(CMAKE_BUILD_POSTFIX "${CMAKE_MINSIZEREL_POSTFIX}")
-ELSEIF(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
-    SET(CMAKE_BUILD_POSTFIX "${CMAKE_RELWITHDEBINFO_POSTFIX}")
-ELSEIF(CMAKE_BUILD_TYPE MATCHES "Debug")
-    SET(CMAKE_BUILD_POSTFIX "${CMAKE_DEBUG_POSTFIX}")
-ELSE()
-    SET(CMAKE_BUILD_POSTFIX "")
-ENDIF()
+SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Postfix for debug builds")
 
 IF(UNIX AND NOT WIN32)
   SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
