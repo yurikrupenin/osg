@@ -865,6 +865,7 @@ ENDIF()
 
 ################################################################################
 # Installation stuff
+SET(CMAKE_DEBUG_POSTFIX "d" CACHE STRING "Postfix for debug builds")
 
 # Correct any incorrect case usage in CMAKE_BUILD_TYPE
 IF     (CMAKE_BUILD_TYPE MATCHES "release" OR CMAKE_BUILD_TYPE MATCHES "RELEASE")
