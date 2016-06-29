@@ -1831,6 +1831,7 @@ bool State::DefineMap::updateCurrentDefines()
                 }
             }
         }
+        changed = false;
         return true;
     }
     else
