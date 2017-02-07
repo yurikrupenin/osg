@@ -27,7 +27,7 @@ FOREACH( mylibfolder
         osgUI
         osgVolume
         osgWrappers/serializers
-        osgWrappers/deprecated-dotosg
+
         osgPlugins
     )
 
@@ -39,4 +39,8 @@ IF ((QT4_FOUND OR Qt5Widgets_FOUND) AND NOT ANDROID)
     ADD_SUBDIRECTORY(osgQt)
 ENDIF()
 
+OPTION(BUILD_OSG_DEPRECATED_SERIALIZERS "Build deprecated .osg serializers" ON)
 
+if(BUILD_OSG_DEPRECATED_SERIALIZERS)
+    ADD_SUBDIRECTORY(osgWrappers/deprecated-dotosg)
+endif()
