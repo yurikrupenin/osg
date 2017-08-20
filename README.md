@@ -1,21 +1,17 @@
 "OSG on steroids"
 =================
 
-A fork of OpenSceneGraph focused on speed, and less focused on accuracy & backwards compatibility.
+A fork of OpenSceneGraph focused on performance, and less concerned with accuracy & backwards compatibility.
 
-This fork was created to experiment with performance enhancements for [OpenMW](https://github.com/OpenMW/openmw), that are too controversial to be included in the general purpose OSG project - either for design reasons or backward compatibility reasons.
+This fork was created to experiment with performance enhancements for [OpenMW](https://github.com/OpenMW/openmw) that are too controversial to be included in the general purpose OSG project - either for design reasons or backward compatibility reasons.
 
-OpenMW still works with "vanilla" OpenSceneGraph - but it will run at slightly lower framerate.
+OpenMW still works with "vanilla" OpenSceneGraph, but it is recommended to use the fork for better performance (around 10-15% on most devices). Occasionally, we will also apply OpenMW-relevant bug fixes that have not made it into a released version of OSG yet.
 
-Current list of patches in this repository:
+The fork is currently based on the OpenSceneGraph-3.4 branch and will continue to be based on the latest stable branch of OSG at the time. 
 
-- Use single precision matrices & planes by default.
-- Added option for single precision osg::Quat's (enabled by default). [Similar change rejected on osg-submissions.](http://forum.openscenegraph.org/viewtopic.php?t=12953)
-- Nodes with invalid bounding sphere (which you get e.g. when creating a completely empty node) are interpreted as "always culled". This type of node is common in a bone hierarchy for skeletal animation, and culling them early helps performance. [Rejected on osg-submissions](http://forum.openscenegraph.org/viewtopic.php?t=15412).
-- Removed several dynamic_cast's.
-- (Occasionally:) Uncontroversial bug fixes that were proposed upstream but have not been merged yet.
+A list of all changes can be viewed [here](https://github.com/openscenegraph/OpenSceneGraph/compare/OpenSceneGraph-3.4...OpenMW:master).
 
-Planned changes: see https://github.com/scrawl/osg/issues
+For planned changes: see https://github.com/scrawl/osg/issues
 
 The original OpenSceneGraph read me and credits follows below.
 
