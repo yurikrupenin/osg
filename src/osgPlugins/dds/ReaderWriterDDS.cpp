@@ -228,6 +228,10 @@ struct DXT1TexelsBlock
 #define DDPF_LUMINANCE          0x00020000l
 #define DDPF_BUMPLUMINANCE      0x00040000l        // L,U,V
 #define DDPF_BUMPDUDV           0x00080000l        // U,V
+#define DDPF_PALETTEINDEXED1    0x00000800l
+#define DDPF_PALETTEINDEXED2    0x00001000l
+#define DDPF_PALETTEINDEXED4    0x00000008l
+#define DDPF_PALETTEINDEXED8    0x00000020l
 
 //
 // DDSCAPS flags
@@ -468,6 +472,12 @@ osg::Image* ReadDDSFile(std::istream& _istream, bool flipDDSRead)
 //         // handle as RGB
 //         // L6V5U5 -- 655 is not supported data type in GL
 //         // X8L8V8U8 -- just as RGB
+    }
+    if(ddsd.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8)
+    {
+        OSG_WARN << "ReadDDSFile warning: DDPF_PALETTEINDEXED8 format is not supported" << std::endl;
+        // totally not necessary once supported
+        // return NULL;
     }
 
     // Uncompressed formats will usually use DDPF_RGB to indicate an RGB format,
@@ -944,6 +954,12 @@ osg::Image* ReadDDSFile(std::istream& _istream, bool flipDDSRead)
             return NULL;
         }
     }
+    else if(ddsd.ddpfPixelFormat.dwFlags & DDPF_PALETTEINDEXED8){
+        // Just enough information to allow the image data to be read
+        internalFormat = GL_R8;
+        pixelFormat    = GL_RED;
+        dataType       = GL_UNSIGNED_BYTE;
+    }
     else
     {
         OSG_WARN << "ReadDDSFile warning: unhandled pixel format (ddsd.ddpfPixelFormat.dwFlags"
@@ -985,11 +1001,6 @@ osg::Image* ReadDDSFile(std::istream& _istream, bool flipDDSRead)
    OSG_INFO<<"ReadDDS, dataType = 0x"<<std::hex<<dataType<<std::endl;
 
     unsigned char* imageData = new unsigned char [sizeWithMipmaps];
-    if(!imageData)
-    {
-        OSG_WARN << "ReadDDSFile warning: imageData == NULL" << std::endl;
-        return NULL;
-    }
 
     // Read pixels in two chunks. First main image, next mipmaps.
     if ( !_istream.read( (char*)imageData, size ) )
@@ -1002,7 +1013,6 @@ osg::Image* ReadDDSFile(std::istream& _istream, bool flipDDSRead)
     // If loading mipmaps in second chunk fails we may still use main image
     if ( size < sizeWithMipmaps && !_istream.read( (char*)imageData + size, sizeWithMipmaps - size ) )
     {
-        sizeWithMipmaps = size;
         mipmap_offsets.resize( 0 );
         OSG_WARN << "ReadDDSFile warning: couldn't read mipmapData" << std::endl;
 
